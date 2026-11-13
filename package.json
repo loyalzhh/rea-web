@@ -1,0 +1,14 @@
+{
+  "name": "rea-web",
+  "version": "1.0.0",
+  "description": "本地 APK 逆向分析 Web 界面：拖拽上传 → jadx 反编译 → 在线浏览源码",
+  "main": "server.js",
+  "scripts": {
+    "setup": "bash scripts/setup-tools.sh",
+    "start": "node server.js"
+  },
+  "engines": {
+    "node": ">=18"
+  },
+  "license": "MIT"
+}

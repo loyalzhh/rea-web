@@ -1,0 +1,243 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>REA Web · 本地 APK 逆向分析</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github.min.css">
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  :root {
+    --bg: #f5f6f8; --panel: #ffffff; --border: #e3e6ea;
+    --text: #24292f; --text-dim: #6e7781; --accent: #0969da;
+    --accent-soft: #ddf4ff; --green: #1a7f37; --red: #d1242f;
+    --mono: "Cascadia Code", "JetBrains Mono", Consolas, monospace;
+  }
+  body { font-family: "Segoe UI", "Microsoft YaHei", sans-serif; background: var(--bg); color: var(--text); height: 100vh; display: flex; flex-direction: column; }
+
+  header { background: var(--panel); border-bottom: 1px solid var(--border); padding: 12px 20px; display: flex; align-items: center; gap: 12px; }
+  header .logo { font-size: 18px; font-weight: 700; }
+  header .logo span { color: var(--accent); }
+  header .tag { font-size: 12px; color: var(--text-dim); background: var(--bg); border: 1px solid var(--border); border-radius: 10px; padding: 2px 10px; }
+
+  /* 上传视图 */
+  #uploadView { flex: 1; display: flex; align-items: center; justify-content: center; }
+  #dropZone {
+    width: min(560px, 90vw); padding: 60px 40px; text-align: center; cursor: pointer;
+    background: var(--panel); border: 2px dashed var(--border); border-radius: 16px; transition: .2s;
+  }
+  #dropZone:hover, #dropZone.drag { border-color: var(--accent); background: var(--accent-soft); }
+  #dropZone .icon { font-size: 48px; margin-bottom: 16px; }
+  #dropZone h2 { font-size: 20px; margin-bottom: 8px; }
+  #dropZone p { color: var(--text-dim); font-size: 13px; line-height: 1.8; }
+  #dropZone .btn { display: inline-block; margin-top: 18px; padding: 8px 24px; background: var(--accent); color: #fff; border-radius: 8px; font-size: 14px; }
+  #fileInput { display: none; }
+
+  /* 进度视图 */
+  #progressView { flex: 1; display: none; align-items: center; justify-content: center; }
+  .progress-card { width: min(560px, 90vw); background: var(--panel); border: 1px solid var(--border); border-radius: 16px; padding: 36px 40px; }
+  .progress-card h2 { font-size: 17px; margin-bottom: 6px; }
+  .progress-card .fname { font-family: var(--mono); font-size: 13px; color: var(--accent); margin-bottom: 24px; }
+  .steps { display: flex; flex-direction: column; gap: 14px; }
+  .step { display: flex; align-items: center; gap: 12px; font-size: 14px; color: var(--text-dim); }
+  .step .dot { width: 22px; height: 22px; border-radius: 50%; border: 2px solid var(--border); display: flex; align-items: center; justify-content: center; font-size: 12px; flex-shrink: 0; }
+  .step.active { color: var(--text); }
+  .step.active .dot { border-color: var(--accent); animation: pulse 1s infinite alternate; }
+  .step.done .dot { border-color: var(--green); background: var(--green); color: #fff; }
+  .step.fail { color: var(--red); }
+  .step.fail .dot { border-color: var(--red); background: var(--red); color: #fff; }
+  @keyframes pulse { from { box-shadow: 0 0 0 0 rgba(9,105,218,.25); } to { box-shadow: 0 0 0 6px rgba(9,105,218,0); } }
+  #logTail { margin-top: 20px; max-height: 140px; overflow: auto; background: var(--bg); border-radius: 8px; padding: 10px; font-family: var(--mono); font-size: 11px; color: var(--text-dim); white-space: pre-wrap; display: none; }
+
+  /* 分析结果视图 */
+  #resultView { flex: 1; display: none; overflow: hidden; }
+  .split { display: flex; height: 100%; }
+  #sidebar { width: 300px; min-width: 300px; background: var(--panel); border-right: 1px solid var(--border); display: flex; flex-direction: column; }
+  #sidebar .tools { padding: 10px; border-bottom: 1px solid var(--border); }
+  #searchInput { width: 100%; padding: 6px 10px; border: 1px solid var(--border); border-radius: 6px; font-size: 13px; outline: none; }
+  #searchInput:focus { border-color: var(--accent); }
+  #tree { flex: 1; overflow: auto; padding: 8px 4px; font-size: 13px; }
+  .tree-dir, .tree-file { padding: 3px 6px 3px 20px; cursor: pointer; white-space: nowrap; position: relative; user-select: none; }
+  .tree-dir:hover, .tree-file:hover, .tree-file.selected { background: var(--accent-soft); }
+  .tree-dir::before { content: "▸"; position: absolute; left: 6px; transition: .15s; color: var(--text-dim); }
+  .tree-dir.open::before { transform: rotate(90deg); }
+  .tree-children { display: none; margin-left: 14px; }
+  .tree-children.open { display: block; }
+  .tree-file::before { content: "◦"; position: absolute; left: 6px; color: var(--text-dim); }
+  #viewer { flex: 1; display: flex; flex-direction: column; overflow: hidden; }
+  #viewerHeader { padding: 8px 16px; background: var(--panel); border-bottom: 1px solid var(--border); font-family: var(--mono); font-size: 12px; color: var(--text-dim); }
+  #codeWrap { flex: 1; overflow: auto; background: var(--panel); }
+  #code { font-family: var(--mono); font-size: 13px; line-height: 1.55; display: block; padding: 12px 16px; }
+  #viewerEmpty { flex: 1; display: flex; align-items: center; justify-content: center; color: var(--text-dim); font-size: 14px; }
+  #newAnalysis { margin-left: auto; font-size: 12px; padding: 5px 12px; border: 1px solid var(--border); border-radius: 6px; background: var(--panel); cursor: pointer; color: var(--text); }
+  #newAnalysis:hover { border-color: var(--accent); color: var(--accent); }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="logo">REA<span>·</span>Web</div>
+  <div class="tag">本地 APK 逆向分析 · jadx 1.5.6</div>
+  <button id="newAnalysis" style="display:none">＋ 新分析</button>
+</header>
+
+<!-- 上传 -->
+<div id="uploadView">
+  <div id="dropZone">
+    <div class="icon">📦</div>
+    <h2>拖入 APK 文件开始分析</h2>
+    <p>所有处理均在本机完成，文件不会上传到任何服务器<br>支持 .apk · 自动反编译为 Java 源码</p>
+    <div class="btn">或点击选择文件</div>
+    <input type="file" id="fileInput" accept=".apk">
+  </div>
+</div>
+
+<!-- 进度 -->
+<div id="progressView">
+  <div class="progress-card">
+    <h2>正在分析</h2>
+    <div class="fname" id="progFile">-</div>
+    <div class="steps">
+      <div class="step" id="s1"><div class="dot">1</div>上传文件</div>
+      <div class="step" id="s2"><div class="dot">2</div>jadx 反编译（大文件可能需要几分钟）</div>
+      <div class="step" id="s3"><div class="dot">3</div>生成文件索引</div>
+    </div>
+    <div id="logTail"></div>
+  </div>
+</div>
+
+<!-- 结果 -->
+<div id="resultView">
+  <div class="split">
+    <div id="sidebar">
+      <div class="tools"><input id="searchInput" placeholder="搜索类名 / 文件名…"></div>
+      <div id="tree"></div>
+    </div>
+    <div id="viewer">
+      <div id="viewerHeader">选择左侧文件查看反编译源码</div>
+      <div id="viewerEmpty">← 点击文件树中的类查看源码</div>
+      <div id="codeWrap" style="display:none"><code id="code"></code></div>
+    </div>
+  </div>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+<script>
+const $ = (id) => document.getElementById(id);
+let currentJob = null;
+
+function show(view) {
+  for (const v of ["uploadView", "progressView", "resultView"]) $(v).style.display = "none";
+  $(view).style.display = view === "resultView" ? "block" : "flex";
+  $("newAnalysis").style.display = view === "resultView" ? "inline-block" : "none";
+}
+
+function setStep(id, cls) { const el = $(id); el.classList.remove("active", "done", "fail"); if (cls) el.classList.add(cls); }
+
+async function analyze(file) {
+  if (!file) return;
+  show("progressView");
+  $("progFile").textContent = file.name;
+  setStep("s1", "active"); setStep("s2", ""); setStep("s3", "");
+
+  // 1. 上传
+  let jobId;
+  try {
+    const r = await fetch("/api/analyze", {
+      method: "POST",
+      headers: { "X-Filename": encodeURIComponent(file.name) },
+      body: file,
+    });
+    const j = await r.json();
+    if (!r.ok) throw new Error(j.error || "上传失败");
+    jobId = j.jobId;
+    currentJob = jobId;
+  } catch (e) { setStep("s1", "fail"); alert("上传失败: " + e.message); return; }
+  setStep("s1", "done"); setStep("s2", "active");
+  $("logTail").style.display = "block";
+
+  // 2. 轮询反编译状态
+  while (true) {
+    await new Promise((r) => setTimeout(r, 2000));
+    const j = await (await fetch("/api/job/" + jobId)).json();
+    if (j.logTail) $("logTail").textContent = j.logTail;
+    if (j.status === "error") {
+      setStep("s2", "fail");
+      $("logTail").textContent = "分析失败：\n" + (j.error || "");
+      return;
+    }
+    if (j.status === "done") break;
+  }
+  setStep("s2", "done"); setStep("s3", "active");
+
+  // 3. 加载文件树
+  const t = await (await fetch("/api/tree/" + jobId)).json();
+  renderTree(t.tree, $("tree"), "");
+  setStep("s3", "done");
+  show("resultView");
+}
+
+// 文件树
+function renderTree(nodes, container, prefix) {
+  container.innerHTML = "";
+  for (const n of nodes) {
+    if (n.type === "dir") {
+      const d = document.createElement("div");
+      d.className = "tree-dir"; d.textContent = n.name;
+      const kids = document.createElement("div");
+      kids.className = "tree-children";
+      d.onclick = () => { d.classList.toggle("open"); kids.classList.toggle("open"); };
+      container.appendChild(d); container.appendChild(kids);
+      renderTree(n.children, kids, prefix ? prefix + "/" + n.name : n.name);
+    } else {
+      const f = document.createElement("div");
+      f.className = "tree-file"; f.textContent = n.name;
+      f.dataset.path = prefix ? prefix + "/" + n.name : n.name;
+      f.onclick = () => loadFile(f);
+      container.appendChild(f);
+    }
+  }
+}
+
+async function loadFile(el) {
+  document.querySelectorAll(".tree-file.selected").forEach((x) => x.classList.remove("selected"));
+  el.classList.add("selected");
+  $("viewerHeader").textContent = "加载中… " + el.dataset.path;
+  $("viewerEmpty").style.display = "none";
+  $("codeWrap").style.display = "block";
+  $("code").textContent = "";
+  const r = await fetch("/api/file/" + currentJob + "?path=" + encodeURIComponent(el.dataset.path));
+  const j = await r.json();
+  if (!r.ok) { $("code").textContent = "⚠ " + (j.error || "读取失败"); return; }
+  $("viewerHeader").textContent = el.dataset.path;
+  $("code").textContent = j.content;
+  if (window.hljs) { try { hljs.highlightElement($("code")); } catch (e) {} }
+}
+
+// 搜索过滤
+$("searchInput").addEventListener("input", (e) => {
+  const q = e.target.value.trim().toLowerCase();
+  document.querySelectorAll("#tree .tree-file").forEach((f) => {
+    const showFile = !q || f.dataset.path.toLowerCase().includes(q);
+    f.style.display = showFile ? "" : "none";
+    if (showFile && q) { // 展开祖先目录
+      let p = f.parentElement;
+      while (p && p.id !== "tree") {
+        if (p.classList.contains("tree-children")) { p.classList.add("open"); p.previousElementSibling.classList.add("open"); }
+        p = p.parentElement;
+      }
+    }
+  });
+});
+
+// 拖拽 & 选择
+const dz = $("dropZone");
+dz.onclick = () => $("fileInput").click();
+$("fileInput").onchange = (e) => analyze(e.target.files[0]);
+dz.ondragover = (e) => { e.preventDefault(); dz.classList.add("drag"); };
+dz.ondragleave = () => dz.classList.remove("drag");
+dz.ondrop = (e) => { e.preventDefault(); dz.classList.remove("drag"); analyze(e.dataTransfer.files[0]); };
+$("newAnalysis").onclick = () => { currentJob = null; show("uploadView"); };
+</script>
+</body>
+</html>

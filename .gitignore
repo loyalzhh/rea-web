@@ -1,0 +1,13 @@
+# 工具二进制（运行 scripts/setup-tools 自动下载，不入库）
+tools/
+*.zip
+*.jar
+*.apk
+
+# 分析数据
+data/
+
+# 系统/编辑器
+node_modules/
+.DS_Store
+Thumbs.db
