@@ -1,0 +1,315 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- 沉浸式阅读页：仿主流中文阅读 App 的布局（工具栏点击中央显隐 + 底部设置面板） -->
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/readerRoot"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/paper">
+
+    <!-- 正文区 -->
+    <LinearLayout
+        android:id="@+id/readingArea"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="vertical">
+
+        <ScrollView
+            android:id="@+id/scrollContent"
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_weight="1"
+            android:fillViewport="false"
+            android:scrollbars="none">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:paddingLeft="24dp"
+                android:paddingRight="24dp"
+                android:paddingTop="44dp"
+                android:paddingBottom="36dp">
+
+                <TextView
+                    android:id="@+id/tvChapterTitle"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:textSize="16sp"
+                    android:textStyle="bold"
+                    android:textColor="@color/text_main"
+                    android:paddingBottom="20dp" />
+
+                <TextView
+                    android:id="@+id/tvContent"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:textSize="20sp"
+                    android:lineSpacingExtra="10dp"
+                    android:textColor="@color/text_main" />
+            </LinearLayout>
+        </ScrollView>
+
+        <TextView
+            android:id="@+id/tvFooter"
+            android:layout_width="match_parent"
+            android:layout_height="26dp"
+            android:gravity="right|center_vertical"
+            android:paddingRight="18dp"
+            android:paddingLeft="18dp"
+            android:textSize="11sp"
+            android:textColor="@color/text_sub" />
+    </LinearLayout>
+
+    <!-- 顶部工具栏（默认隐藏，点正文唤出） -->
+    <LinearLayout
+        android:id="@+id/topBar"
+        android:layout_width="match_parent"
+        android:layout_height="54dp"
+        android:layout_gravity="top"
+        android:orientation="horizontal"
+        android:gravity="center_vertical"
+        android:paddingLeft="12dp"
+        android:paddingRight="12dp"
+        android:background="#EEFFFDF7"
+        android:elevation="4dp"
+        android:visibility="gone">
+
+        <TextView
+            android:id="@+id/btnBack"
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:gravity="center_vertical"
+            android:text="‹  返回"
+            android:textSize="15sp"
+            android:textColor="@color/text_main"
+            android:clickable="true"
+            android:background="?android:attr/selectableItemBackground" />
+
+        <TextView
+            android:id="@+id/tvBookTitle"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            android:gravity="center"
+            android:singleLine="true"
+            android:ellipsize="middle"
+            android:textSize="15sp"
+            android:textStyle="bold"
+            android:textColor="@color/text_main" />
+
+        <TextView
+            android:id="@+id/btnMore"
+            android:layout_width="40dp"
+            android:layout_height="match_parent"
+            android:gravity="center"
+            android:text="⋮"
+            android:textSize="22sp"
+            android:textColor="@color/text_main"
+            android:clickable="true"
+            android:background="?android:attr/selectableItemBackground" />
+    </LinearLayout>
+
+    <!-- 底部工具栏 -->
+    <LinearLayout
+        android:id="@+id/bottomBar"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_gravity="bottom"
+        android:orientation="vertical"
+        android:paddingLeft="12dp"
+        android:paddingRight="12dp"
+        android:paddingTop="8dp"
+        android:paddingBottom="10dp"
+        android:background="#EEFFFDF7"
+        android:elevation="6dp"
+        android:visibility="gone">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:gravity="center_vertical">
+
+            <TextView
+                android:id="@+id/btnPrevCh"
+                android:layout_width="wrap_content"
+                android:layout_height="36dp"
+                android:gravity="center"
+                android:text="上一章"
+                android:textSize="12sp"
+                android:textColor="@color/text_sub"
+                android:clickable="true"
+                android:background="?android:attr/selectableItemBackground" />
+
+            <SeekBar
+                android:id="@+id/seekProgress"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:max="100" />
+
+            <TextView
+                android:id="@+id/btnNextCh"
+                android:layout_width="wrap_content"
+                android:layout_height="36dp"
+                android:gravity="center"
+                android:text="下一章"
+                android:textSize="12sp"
+                android:textColor="@color/text_sub"
+                android:clickable="true"
+                android:background="?android:attr/selectableItemBackground" />
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:layout_marginTop="6dp">
+
+            <TextView android:id="@+id/btnCatalog" style="@style/ReaderTool" android:text="☰\n目录" />
+            <TextView android:id="@+id/btnTheme" style="@style/ReaderTool" android:text="◐\n背景" />
+            <TextView android:id="@+id/btnSettings" style="@style/ReaderTool" android:text="Aa\n设置" />
+            <TextView android:id="@+id/btnRead" style="@style/ReaderTool" android:text="♪\n朗读" />
+            <TextView android:id="@+id/btnTimerQuick" style="@style/ReaderTool" android:text="⏱\n定时" />
+        </LinearLayout>
+    </LinearLayout>
+
+    <!-- 阅读设置面板 -->
+    <LinearLayout
+        android:id="@+id/settingsPanel"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_gravity="bottom"
+        android:orientation="vertical"
+        android:padding="16dp"
+        android:background="#FFFDF7"
+        android:elevation="8dp"
+        android:visibility="gone">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:gravity="center_vertical">
+
+            <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
+                android:text="字号" android:textSize="13sp" android:textColor="@color/text_sub" />
+
+            <TextView android:id="@+id/btnFontMinus" style="@style/ReaderSmallBtn" android:text="－" />
+            <TextView android:id="@+id/tvFontSize" android:layout_width="38dp"
+                android:layout_height="wrap_content" android:gravity="center"
+                android:text="20" android:textSize="14sp" android:textColor="@color/text_main" />
+            <TextView android:id="@+id/btnFontPlus" style="@style/ReaderSmallBtn" android:text="＋" />
+
+            <View android:layout_width="0dp" android:layout_height="1dp" android:layout_weight="1" />
+
+            <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
+                android:text="行距" android:textSize="13sp" android:textColor="@color/text_sub" />
+            <TextView android:id="@+id/btnLine1" style="@style/ReaderSmallBtn" android:text="紧凑" />
+            <TextView android:id="@+id/btnLine2" style="@style/ReaderSmallBtn" android:text="标准" />
+            <TextView android:id="@+id/btnLine3" style="@style/ReaderSmallBtn" android:text="宽松" />
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:gravity="center_vertical"
+            android:layout_marginTop="14dp">
+
+            <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
+                android:text="背景" android:textSize="13sp" android:textColor="@color/text_sub" />
+
+            <TextView android:id="@+id/theme0" style="@style/ReaderSwatch" android:text="羊皮纸" />
+            <TextView android:id="@+id/theme1" style="@style/ReaderSwatch" android:text="纯白" />
+            <TextView android:id="@+id/theme2" style="@style/ReaderSwatch" android:text="护眼" />
+            <TextView android:id="@+id/theme3" style="@style/ReaderSwatch" android:text="浅灰" />
+            <TextView android:id="@+id/theme4" style="@style/ReaderSwatch" android:text="夜间" />
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:gravity="center_vertical"
+            android:layout_marginTop="14dp">
+
+            <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
+                android:text="亮度" android:textSize="13sp" android:textColor="@color/text_sub" />
+            <SeekBar android:id="@+id/seekBrightness"
+                android:layout_width="0dp" android:layout_height="wrap_content"
+                android:layout_weight="1" android:max="100" android:progress="70" />
+            <TextView android:id="@+id/tvBrightness" android:layout_width="44dp"
+                android:layout_height="wrap_content" android:gravity="right"
+                android:text="跟随" android:textSize="11sp" android:textColor="@color/text_sub" />
+        </LinearLayout>
+
+        <TextView android:id="@+id/btnCloseSettings"
+            android:layout_width="match_parent" android:layout_height="36dp"
+            android:gravity="center" android:text="收起 ▾" android:textSize="13sp"
+            android:textColor="@color/text_sub" android:clickable="true"
+            android:background="?android:attr/selectableItemBackground"
+            android:layout_marginTop="8dp" />
+    </LinearLayout>
+
+    <!-- 朗读控制条 -->
+    <LinearLayout
+        android:id="@+id/ttsBar"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_gravity="bottom"
+        android:orientation="vertical"
+        android:padding="14dp"
+        android:background="#FFFDF7"
+        android:elevation="8dp"
+        android:visibility="gone">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:gravity="center_vertical">
+
+            <TextView android:id="@+id/btnPrevSentence" style="@style/ReaderSmallBtn" android:text="⏮ 上句" />
+            <TextView android:id="@+id/btnPlay"
+                android:layout_width="0dp" android:layout_height="42dp" android:layout_weight="1.4"
+                android:gravity="center" android:text="▶  开始朗读" android:textSize="15sp"
+                android:textColor="#FFFFFF" android:background="#B4552D"
+                android:clickable="true" />
+            <TextView android:id="@+id/btnNextSentence" style="@style/ReaderSmallBtn" android:text="下句 ⏭" />
+            <TextView android:id="@+id/btnCloseTts" style="@style/ReaderSmallBtn" android:text="✕" />
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:gravity="center_vertical"
+            android:layout_marginTop="10dp">
+
+            <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
+                android:text="语速" android:textSize="12sp" android:textColor="@color/text_sub" />
+            <SeekBar android:id="@+id/seekSpeed"
+                android:layout_width="0dp" android:layout_height="wrap_content"
+                android:layout_weight="1" android:max="20" android:progress="10" />
+            <TextView android:id="@+id/tvSpeed" android:layout_width="38dp"
+                android:layout_height="wrap_content" android:text="1.0x"
+                android:textSize="11sp" android:textColor="@color/text_sub" />
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:layout_marginTop="6dp">
+
+            <TextView android:id="@+id/btnVoice" style="@style/ReaderTool" android:text="切换音色" />
+            <TextView android:id="@+id/btnTimer" style="@style/ReaderTool" android:text="定时：关" />
+        </LinearLayout>
+
+        <TextView android:id="@+id/tvStatus"
+            android:layout_width="match_parent" android:layout_height="wrap_content"
+            android:text="就绪" android:textSize="11sp" android:textColor="@color/text_sub"
+            android:paddingTop="6dp" />
+    </LinearLayout>
+</FrameLayout>

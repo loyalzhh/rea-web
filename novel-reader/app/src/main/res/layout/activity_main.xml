@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:background="@color/bg"
+    android:padding="20dp">
+
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="@string/shelf_title"
+        android:textSize="26sp"
+        android:textStyle="bold"
+        android:textColor="@color/text_main"
+        android:paddingTop="16dp" />
+
+    <TextView
+        android:id="@+id/tvEngine"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="语音引擎：检测中…"
+        android:textSize="12sp"
+        android:textColor="@color/text_sub"
+        android:paddingTop="6dp"
+        android:paddingBottom="12dp" />
+
+    <ListView
+        android:id="@+id/listBooks"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:divider="@color/divider"
+        android:dividerHeight="1dp" />
+
+    <Button
+        android:id="@+id/btnImport"
+        android:layout_width="match_parent"
+        android:layout_height="52dp"
+        android:text="@string/import_book"
+        android:textSize="16sp"
+        android:layout_marginTop="12dp" />
+
+    <Button
+        android:id="@+id/btnEngine"
+        android:layout_width="match_parent"
+        android:layout_height="44dp"
+        android:text="选择语音引擎 / 音色"
+        android:textSize="14sp"
+        android:layout_marginTop="8dp" />
+
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="提示：手机上装有「讯飞语音引擎」时可自动使用讯飞音色；本应用仅朗读本地导入或内置的公版文本。"
+        android:textSize="11sp"
+        android:textColor="@color/text_sub"
+        android:paddingTop="10dp" />
+</LinearLayout>

@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">听书 · 小说朗读</string>
+    <string name="import_book">导入 TXT 小说</string>
+    <string name="shelf_title">我的书架</string>
+    <string name="start_read">开始朗读</string>
+    <string name="pause_read">暂停朗读</string>
+    <string name="prev_chapter">上一章</string>
+    <string name="next_chapter">下一章</string>
+</resources>
